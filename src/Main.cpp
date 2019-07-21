@@ -215,6 +215,8 @@ int main() {
                 sf::Text labelText = getText(label);
                 sf::FloatRect boundingBox = labelText.getLocalBounds();
                 sf::Vector2f labelPosition(x - boundingBox.left - boundingBox.width / 2.0f, originPos.y);
+                labelPosition.y = std::clamp(labelPosition.y, 0.0f, 
+                                             windowSize.y - boundingBox.height - 2.0f * boundingBox.top);
                 if(label == 0)
                     labelPosition.x = originPos.x - boundingBox.left - boundingBox.top - boundingBox.width;
                 labelText.setPosition(labelPosition);
@@ -226,6 +228,8 @@ int main() {
                 sf::FloatRect boundingBox = labelText.getLocalBounds();
                 sf::Vector2f labelPosition(originPos.x - boundingBox.left - boundingBox.top - boundingBox.width,
                                            y - boundingBox.top - boundingBox.height / 2.0f);
+                labelPosition.x = std::clamp(labelPosition.x, 0.0f + boundingBox.top, 
+                                             windowSize.x - boundingBox.width - boundingBox.left - boundingBox.top);
                 if(label == 0) labelPosition.y = originPos.y;
                 labelText.setPosition(labelPosition);
                 window.draw(labelText);
