@@ -111,7 +111,7 @@ int main() {
                             newPixelsPerUnit = std::clamp(newPixelsPerUnit, minPixelsPerUnit, maxPixelsPerUnit);
                             float zoomingFactor = newPixelsPerUnit / pixelsPerUnit;
                             originPos *= zoomingFactor;
-                            originPos += windowSize * (1.0f - zoomingFactor) / 2.0f;
+                            originPos += (sf::Vector2f)mousePos * (1.0f - zoomingFactor);
                             pixelsPerUnit = newPixelsPerUnit;
                             break;
                         }
