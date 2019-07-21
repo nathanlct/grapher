@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <cmath>
+#include <string>
 #include <iostream>
 
 using std::cout, std::endl;
@@ -44,6 +45,9 @@ int main() {
 
     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
     bool isDragging = false;
+
+    sf::Font font;
+    font.loadFromFile("res/Verdana.ttf");
 
     sf::Event event;    
     sf::Clock clock;
@@ -140,7 +144,7 @@ int main() {
 
             // draw a function
             auto f = [](float x) {
-                return cos(2.0f * x) + cos(3.0f * x) + exp(-x/20.0f) * cos(4.0f * x);
+                return cos(2.0f * x) + cos(3.0f * x);
             };
 
             std::vector<sf::Vertex> vertices;
@@ -163,6 +167,36 @@ int main() {
             }
 
             window.draw(&vertices[0], vertices.size(), sf::TrianglesStrip); 
+
+            // draw axis tick labels 
+            auto getText = [&font](int label) {
+                sf::Text text(std::to_string(label), font);
+                text.setFillColor(sf::Color::Black);
+                text.setCharacterSize(24);
+                return text;
+            };
+            float gridPixelInterval = gridUnitInterval * pixelsPerUnit;
+
+            for(float x = fmod(originPos.x, gridPixelInterval); x < windowSize.x; x += gridPixelInterval) {
+                int label = round((x - originPos.x) / gridPixelInterval);
+                sf::Text labelText = getText(label);
+                sf::FloatRect boundingBox = labelText.getLocalBounds();
+                sf::Vector2f labelPosition(x - boundingBox.left - boundingBox.width / 2.0f, originPos.y);
+                if(label == 0)
+                    labelPosition.x = originPos.x - boundingBox.left - boundingBox.top - boundingBox.width;
+                labelText.setPosition(labelPosition);
+                window.draw(labelText);
+            }
+            for(float y = fmod(originPos.y, gridPixelInterval); y < windowSize.x; y += gridPixelInterval) {
+                int label = round((originPos.y - y) / gridPixelInterval);
+                sf::Text labelText = getText(label);
+                sf::FloatRect boundingBox = labelText.getLocalBounds();
+                sf::Vector2f labelPosition(originPos.x - boundingBox.left - boundingBox.top - boundingBox.width,
+                                           y - boundingBox.top - boundingBox.height / 2.0f);
+                if(label == 0) labelPosition.y = originPos.y;
+                labelText.setPosition(labelPosition);
+                window.draw(labelText);
+            }
 
             window.display();
         }
