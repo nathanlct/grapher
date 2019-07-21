@@ -157,13 +157,13 @@ int main() {
                 float dUnitX = 0.01f;
                 float tangentAngle = atan2(f(unitX - dUnitX) - f(unitX + dUnitX), - 2 * dUnitX) + 3.14159f / 2.0f;
 
-                float thickness = 3.0f;
+                float thickness = 2.0f;
                 vertices.push_back(sf::Vertex({ pixelX + thickness * cos(tangentAngle),
                                                 pixelY + thickness * sin(tangentAngle) },
-                                              sf::Color(255, 0, 0)));
+                                              sf::Color(255, 0, 0, 160)));
                 vertices.push_back(sf::Vertex({ pixelX + thickness * cos(tangentAngle + 3.14159f),
                                                 pixelY + thickness * sin(tangentAngle + 3.14159f) },
-                                              sf::Color(255, 0, 0)));
+                                              sf::Color(255, 0, 0, 160)));
             }
 
             window.draw(&vertices[0], vertices.size(), sf::TrianglesStrip); 
