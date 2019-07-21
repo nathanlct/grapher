@@ -22,6 +22,10 @@ const float minPixelsPerUnit = 10.0f;
 const float maxPixelsPerUnit = 1000.0f;
 const float zoomingSpeed = 1.0f;
 
+// dragging
+const float draggingSpeedMultiplicator = 8.0f;
+const float draggingSpeedDecayTimeMultiplicator = 10.0f;
+
 // grid
 const float gridUnitInterval = 1.0f;
 const float subGridUnitInterval = 0.25f;
@@ -43,8 +47,9 @@ int main() {
     float pixelsPerUnit = defaultPixelsPerUnit;
     sf::Vector2f originPos = defaultOriginPos;
 
-    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-    bool isDragging = false;
+    sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition(window);
+    bool isDragging = false;  
+    sf::Vector2f draggingSpeed { 0.0f, 0.0f }; 
 
     sf::Font font;
     font.loadFromFile("res/Verdana.ttf");
@@ -98,10 +103,16 @@ int main() {
 
                 case sf::Event::MouseMoved:
                     if(isDragging) {                  
-                        originPos += sf::Vector2f(event.mouseMove.x - mousePos.x, 
-                                                  event.mouseMove.y - mousePos.y);
+                        sf::Vector2f diff { event.mouseMove.x - mousePos.x, 
+                                            event.mouseMove.y - mousePos.y };
+                        originPos += diff;
+                        
+                        if(diff.x == 0.0f && diff.y == 0.0f)
+                            draggingSpeed = { 0.0f, 0.0f };
+                        else
+                            draggingSpeed += diff;
                     }
-                    mousePos = { event.mouseMove.x, event.mouseMove.y };
+                    mousePos = { (float)event.mouseMove.x, (float)event.mouseMove.y };
                     break;
                 
                 case sf::Event::MouseWheelScrolled:
@@ -111,7 +122,7 @@ int main() {
                             newPixelsPerUnit = std::clamp(newPixelsPerUnit, minPixelsPerUnit, maxPixelsPerUnit);
                             float zoomingFactor = newPixelsPerUnit / pixelsPerUnit;
                             originPos *= zoomingFactor;
-                            originPos += (sf::Vector2f)mousePos * (1.0f - zoomingFactor);
+                            originPos += mousePos * (1.0f - zoomingFactor);
                             pixelsPerUnit = newPixelsPerUnit;
                             break;
                         }
@@ -127,7 +138,13 @@ int main() {
 
         if (clock.getElapsedTime().asSeconds() >= timeBetweenFrames) {
             window.clear(backgroundColor);
-            float elapsedTime = clock.restart().asMilliseconds();
+            float elapsedTime = clock.restart().asSeconds();
+
+            // handle dragging speed
+            draggingSpeed -= elapsedTime * draggingSpeedDecayTimeMultiplicator * draggingSpeed / 2.0f;
+            if(!isDragging) {
+                originPos += draggingSpeedMultiplicator * draggingSpeed * elapsedTime;
+            }
 
             // draw grid
             auto getGridVertices = [=](float gridPixelInterval, sf::Color gridColor) {
