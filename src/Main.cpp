@@ -61,6 +61,17 @@ int main() {
                     window.close();
                     break;
 
+                case sf::Event::KeyPressed:
+                    switch(event.key.code) {
+                        case sf::Keyboard::Space:
+                            originPos = defaultOriginPos;
+                            break;
+
+                        default:
+                            break;
+                    }
+                    break;
+
                 case sf::Event::MouseButtonPressed:
                     switch(event.mouseButton.button) {
                         case sf::Mouse::Left:
