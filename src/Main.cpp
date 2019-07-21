@@ -106,10 +106,44 @@ int main() {
                 
                 case sf::Event::MouseWheelScrolled:
                     switch(event.mouseWheelScroll.wheel) {
-                        case sf::Mouse::VerticalWheel:
-                            pixelsPerUnit -= event.mouseWheelScroll.delta * zoomingSpeed;
-                            pixelsPerUnit = std::clamp(pixelsPerUnit, minPixelsPerUnit, maxPixelsPerUnit);
+                        case sf::Mouse::VerticalWheel: {
+                            // float newPixelsPerUnit = 200.0f;
+                            float newPixelsPerUnit = pixelsPerUnit - event.mouseWheelScroll.delta * zoomingSpeed;
+                            newPixelsPerUnit = std::clamp(newPixelsPerUnit, minPixelsPerUnit, maxPixelsPerUnit);
+                            float zoomingFactor = newPixelsPerUnit / pixelsPerUnit;
+
+                            // newPixelsPerUnit = n
+                            // originPos = o
+                            // pixelsPerUnit = p
+                            // windowSize = w
+
+                            // originUnitPos = o / p;
+                            // viewUnitSize = w / p;
+                            // viewAfterZoomingUnitSize = (w/p) * (p/n) = w/n
+                            // originAfterZoomingUnitPos = (o/p)
+                            //     + ((w/n) - (w/p)) / 2.0f;
+                            // originPos = (o/p + (w/n - w/p)/2) * n
+                            // w/n-w/p = wp/np-wn/pn = w(p-n)/pn
+                            // originPos = no/p + w(p-n)/2p
+                            // originPos = fo + w/2(1-f)
+
+                            // o = of - w(1 + f)/2
+
+                            // auto originUnitPos = originPos / pixelsPerUnit;
+                            // auto viewUnitSize = windowSize / pixelsPerUnit;
+                            // auto viewAfterZoomingUnitSize = viewUnitSize / zoomingFactor;
+                            // auto originAfterZoomingUnitPos = originUnitPos
+                            //     + (viewAfterZoomingUnitSize - viewUnitSize) / 2.0f;
+                            // originPos = originAfterZoomingUnitPos * newPixelsPerUnit;
+
+                            originPos *= zoomingFactor;
+                            originPos += windowSize * (1.0f - zoomingFactor) / 2.0f;
+                            // originPos = (originPos/pixelsPerUnit + (windowSize/newPixelsPerUnit - windowSize/pixelsPerUnit)/2.0f)*newPixelsPerUnit;
+
+                            pixelsPerUnit = newPixelsPerUnit;
+
                             break;
+                        }
                         case sf::Mouse::HorizontalWheel:
                             break;
                     }
