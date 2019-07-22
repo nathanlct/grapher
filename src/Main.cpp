@@ -74,8 +74,8 @@ int main() {
                     switch(event.key.code) {
                         case sf::Keyboard::Space:
                             originPos = defaultOriginPos;
+                            draggingSpeed = { 0.0f, 0.0f };
                             break;
-
                         default:
                             break;
                     }
