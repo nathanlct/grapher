@@ -27,8 +27,8 @@ const float draggingSpeedMultiplicator = 8.0f;
 const float draggingSpeedDecayTimeMultiplicator = 10.0f;
 
 // grid
-const float gridUnitInterval = 1.0f;
-const float subGridUnitInterval = 0.25f;
+const float defaultGridUnitInterval = 1.0f;
+const float defaultSubGridUnitInterval = 0.25f;
 
 // colors
 const sf::Color backgroundColor { 255, 255, 255 };
@@ -49,7 +49,11 @@ int main() {
 
     sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition(window);
     bool isDragging = false;  
-    sf::Vector2f draggingSpeed { 0.0f, 0.0f }; 
+    sf::Vector2f draggingSpeed { 0.0f, 0.0f };
+
+    float gridUnitInterval = defaultGridUnitInterval;
+    float subGridUnitInterval = defaultSubGridUnitInterval;
+    float lastTotalZoomingFactor = 1.0f; 
 
     sf::Font font;
     font.loadFromFile("res/Verdana.ttf");
@@ -124,6 +128,19 @@ int main() {
                             originPos *= zoomingFactor;
                             originPos += mousePos * (1.0f - zoomingFactor);
                             pixelsPerUnit = newPixelsPerUnit;
+
+                            float totalZoomingFactor = pixelsPerUnit / defaultPixelsPerUnit;
+                            if(totalZoomingFactor <= lastTotalZoomingFactor / 2.0f) {
+                                lastTotalZoomingFactor /= 2.0f;
+                                gridUnitInterval *= 2.0f;
+                                subGridUnitInterval *= 2.0f;
+                            }
+                            else if(totalZoomingFactor >= lastTotalZoomingFactor * 2.0f) {
+                                lastTotalZoomingFactor *= 2.0f;
+                                gridUnitInterval /= 2.0f;
+                                subGridUnitInterval /= 2.0f;
+                            }
+
                             break;
                         }
                         case sf::Mouse::HorizontalWheel:
@@ -202,8 +219,11 @@ int main() {
             window.draw(&vertices[0], vertices.size(), sf::TrianglesStrip); 
 
             // draw axis tick labels 
-            auto getText = [&font](int label) {
-                sf::Text text(std::to_string(label), font);
+            auto getText = [&font](float label) {
+                std::string labelString = std::to_string(label);
+                labelString.erase(labelString.find_last_not_of('0') + 1, std::string::npos); 
+                labelString.erase(labelString.find_last_not_of('.') + 1, std::string::npos);
+                sf::Text text(labelString, font);
                 text.setFillColor(sf::Color::Black);
                 text.setCharacterSize(24);
                 return text;
@@ -211,7 +231,7 @@ int main() {
             float gridPixelInterval = gridUnitInterval * pixelsPerUnit;
 
             for(float x = fmod(originPos.x, gridPixelInterval); x < windowSize.x; x += gridPixelInterval) {
-                int label = round((x - originPos.x) / pixelsPerUnit);
+                float label = round(1000.0f * (x - originPos.x) / pixelsPerUnit) / 1000.0f;
                 sf::Text labelText = getText(label);
                 sf::FloatRect boundingBox = labelText.getLocalBounds();
                 sf::Vector2f labelPosition(x - boundingBox.left - boundingBox.width / 2.0f, originPos.y);
@@ -223,7 +243,7 @@ int main() {
                 window.draw(labelText);
             }
             for(float y = fmod(originPos.y, gridPixelInterval); y < windowSize.x; y += gridPixelInterval) {
-                int label = round((originPos.y - y) / pixelsPerUnit);
+                float label = round(1000.0f * (originPos.y - y) / pixelsPerUnit) / 1000.0f;
                 sf::Text labelText = getText(label);
                 sf::FloatRect boundingBox = labelText.getLocalBounds();
                 sf::Vector2f labelPosition(originPos.x - boundingBox.left - boundingBox.top - boundingBox.width,
