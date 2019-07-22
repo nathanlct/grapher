@@ -211,7 +211,7 @@ int main() {
             float gridPixelInterval = gridUnitInterval * pixelsPerUnit;
 
             for(float x = fmod(originPos.x, gridPixelInterval); x < windowSize.x; x += gridPixelInterval) {
-                int label = round((x - originPos.x) / gridPixelInterval);
+                int label = round((x - originPos.x) / pixelsPerUnit);
                 sf::Text labelText = getText(label);
                 sf::FloatRect boundingBox = labelText.getLocalBounds();
                 sf::Vector2f labelPosition(x - boundingBox.left - boundingBox.width / 2.0f, originPos.y);
@@ -223,7 +223,7 @@ int main() {
                 window.draw(labelText);
             }
             for(float y = fmod(originPos.y, gridPixelInterval); y < windowSize.x; y += gridPixelInterval) {
-                int label = round((originPos.y - y) / gridPixelInterval);
+                int label = round((originPos.y - y) / pixelsPerUnit);
                 sf::Text labelText = getText(label);
                 sf::FloatRect boundingBox = labelText.getLocalBounds();
                 sf::Vector2f labelPosition(originPos.x - boundingBox.left - boundingBox.top - boundingBox.width,
