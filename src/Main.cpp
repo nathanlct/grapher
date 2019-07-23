@@ -30,11 +30,13 @@ const float draggingSpeedDecayTimeMultiplicator = 10.0f;
 const float defaultGridUnitInterval = 1.0f;
 const float defaultSubGridUnitInterval = 0.25f;
 
-// colors
+// colors and design
 const sf::Color backgroundColor { 255, 255, 255 };
 const sf::Color axisColor { 0, 0, 0 };
 const sf::Color gridColor { 200, 200, 200 };
 const sf::Color subGridColor { 235, 235, 235 };
+
+const float axisThickness = 2.0f;
 
 
 int main() {
@@ -184,13 +186,14 @@ int main() {
             window.draw(&gridVertices[0], gridVertices.size(), sf::Lines);
 
             // draw axis
-            sf::Vertex axisLines[] = {
-                sf::Vertex({ originPos.x, 0 }, axisColor),
-                sf::Vertex({ originPos.x, windowSize.y }, axisColor),
-                sf::Vertex({ 0, originPos.y }, axisColor),
-                sf::Vertex({ windowSize.x, originPos.y }, axisColor)
-            };
-            window.draw(axisLines, 4, sf::Lines);
+            sf::RectangleShape horizontalAxis({ windowSize.x, axisThickness });
+            sf::RectangleShape verticalAxis({ axisThickness, windowSize.y });
+            horizontalAxis.setFillColor(axisColor);
+            verticalAxis.setFillColor(axisColor);
+            horizontalAxis.setPosition(0.0f, originPos.y - axisThickness / 2.0f);
+            verticalAxis.setPosition(originPos.x - axisThickness / 2.0f, 0.0f);
+            window.draw(horizontalAxis);
+            window.draw(verticalAxis);
 
             // draw a function
             auto f = [](float x) {
@@ -213,7 +216,7 @@ int main() {
                                               sf::Color(255, 0, 0, 160)));
                 vertices.push_back(sf::Vertex({ pixelX + thickness * cos(tangentAngle + 3.14159f),
                                                 pixelY + thickness * sin(tangentAngle + 3.14159f) },
-                                              sf::Color(255, 0, 0, 160)));
+                                              sf::Color(100, 0, 0, 160)));
             }
 
             window.draw(&vertices[0], vertices.size(), sf::TrianglesStrip); 
